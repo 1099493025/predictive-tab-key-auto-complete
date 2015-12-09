@@ -1,0 +1,26 @@
+{
+    "manifest_version": 2,
+    "name": "Predictive Tab Key Auto Complete",
+    "version": "2015.12.9.2",
+    "description": "Auto Completes Everything You Type, Without Distracting.",
+    "icons": {
+        "16": "icons/16.png",
+        "48": "icons/48.png",
+        "128": "icons/128.png"
+    },
+    "background": {
+        "scripts": [
+            "scripts/background_browserify.js"
+        ],
+        "persistent": false
+    },
+    "author": "Bhaskar Tiwari",
+    "content_scripts": [{
+        "matches": ["<all_urls>"],
+        "js": [
+            "scripts/cursores.js",
+            "scripts/content.js"
+        ],
+        "run_at": "document_start"
+    }]
+}

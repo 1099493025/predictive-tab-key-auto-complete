@@ -1,0 +1,15 @@
+{
+  "name": "predictive-tab-key-auto-complete",
+  "version": "2.0.0",
+  "description": "predictive-tab-key-auto-complete",
+  "repository": "git@github.com:bhskt/predictive-tab-key-auto-complete",
+  "scripts": {
+    "build": "node_modules/browserify/bin/cmd.js -i WNdb -i lapack scripts/background.js > scripts/background_browserify.js && zip -r predictive-tab-key-auto-complete.zip icons/ scripts/ dictionary.json manifest.json && unzip -o predictive-tab-key-auto-complete.zip -d unpacked-extension"
+  },
+  "author": "Bhaskar Tiwari",
+  "license": "RESTRICTED",
+  "dependencies": {
+    "browserify": "^12.0.1",
+    "natural": "^0.2.1"
+  }
+}

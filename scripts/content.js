@@ -8,7 +8,7 @@
     function keyboardAction(event) {
         var node = event.target;
         if(node.selectionEnd && node.selectionStart && node.selectionEnd !== node.selectionStart) {
-            if(event.which === 9 || event.which === 13 || event.which === 39) {
+            if(event.which === 9 || event.which === 13) {
                 node.setSelectionRange(node.selectionEnd, node.selectionEnd);
                 node.setRangeText(' ');
                 node.selectionStart += 1;

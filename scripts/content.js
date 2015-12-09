@@ -7,8 +7,12 @@
         }, cursores = new Cursores();
     function keyboardAction(event) {
         var node = event.target;
+        console.log(event);
         if(node.selectionEnd && node.selectionStart && node.selectionEnd !== node.selectionStart) {
-            if(event.which === 9 || event.which === 13) {
+            if((event.which === 9 || event.which === 13 || event.which === 39) &&
+                !event.altKey &&
+                !event.ctrlKey &&
+                !event.shiftKey) {
                 node.setSelectionRange(node.selectionEnd, node.selectionEnd);
                 node.setRangeText(' ');
                 node.selectionStart += 1;

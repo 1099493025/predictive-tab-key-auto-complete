@@ -46,8 +46,19 @@
         withPrefixWords = withPrefixWords
 
             .filter(function (word) {
-                return word !== prefix &&
-                        !withPrefixWords.joined.match(new RegExp('\\b' + word + '[^ ]\\b'));
+                if (word === prefix) {
+                    return false;
+                }
+
+                var match = withPrefixWords.joined.match(new RegExp('\\b(' + word + '[^ ])\\b'));
+
+                if (match instanceof Array && match[1]) {
+                    if (preservedInput[match[1]].frequency <= preservedInput[word].frequency) {
+                        return false;
+                    }
+                }
+
+                return true;
             })
 
             .sort(function (wordA, wordB) {

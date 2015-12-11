@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Predictive Tab Key Auto Complete",
-    "version": "2015.12.11.4",
+    "version": "2015.12.11.5",
     "description": "Auto Completes Everything You Type In, Without Disturbing.",
     "icons": {
         "16": "icons/16.png",

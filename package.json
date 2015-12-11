@@ -1,15 +1,18 @@
 {
   "name": "predictive-tab-key-auto-complete",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "predictive-tab-key-auto-complete",
   "repository": "git@bitbucket.org:bhskt/predictive-tab-key-auto-complete",
   "scripts": {
-    "build": "node_modules/browserify/bin/cmd.js -i WNdb -i lapack scripts/background.js > scripts/background_browserify.js && zip -r predictive-tab-key-auto-complete.zip icons/ scripts/ dictionary.json manifest.json && unzip -o predictive-tab-key-auto-complete.zip -d unpacked-extension"
+    "start": "node_modules/fsmonitor/bin/fsmonitor.js -d scripts/ -q +content.js +background.js npm run build",
+    "build": "rm -rf unpacked-extension && mkdir unpacked-extension && cp -r icons/ scripts/ dictionary.json manifest.json unpacked-extension/ && node_modules/uglify-js/bin/uglifyjs unpacked-extension/scripts/cursores.js unpacked-extension/scripts/content.js -cm -o unpacked-extension/scripts/content.js && node_modules/uglify-js/bin/uglifyjs unpacked-extension/scripts/background.js -cm -o unpacked-extension/scripts/background.js && node_modules/browserify/bin/cmd.js -i WNdb -i lapack unpacked-extension/scripts/background.js > unpacked-extension/scripts/background_browserify.js && rm unpacked-extension/scripts/background.js unpacked-extension/scripts/cursores.js unpacked-extension/scripts/natural.js && zip -r predictive-tab-key-auto-complete.zip unpacked-extension/"
   },
   "author": "Bhaskar Tiwari",
-  "license": "RESTRICTED",
+  "private": true,
   "dependencies": {
     "browserify": "^12.0.1",
-    "natural": "^0.2.1"
+    "fsmonitor": "^0.2.4",
+    "natural": "^0.2.1",
+    "uglify-js": "^2.6.1"
   }
 }

@@ -1,82 +1,120 @@
-/*global chrome, Cursores*/
+/*global chrome, Cursores, MutationObserver, Event*/
 (function () {
     'use strict';
+
+    const SELECT = {
+        TEXT: 'input[type="text"], input[type="search"], textarea',
+        CONTENT_EDITABLE: '[contenteditable]',
+        IGNORE: 'code, noscript, script, style'
+    };
+
     var port = {
             insert: chrome.runtime.connect({name: 'insert'}),
             query: chrome.runtime.connect({name: 'query'})
-        }, cursores = new Cursores();
-    function keyboardAction(event) {
+        },
+        cursores = new Cursores();
+
+    function recursiveTextNodes(node) {
+        if (node.nodeType === 3 &&
+                !node.isElementContentWhitespace &&
+                node.wholeText.trim().length > 1 &&
+
+                node.parentNode &&
+                node.parentNode.matches &&
+                !node.parentNode.matches(SELECT.IGNORE)) {
+
+            node = node.wholeText.match(/\b(\w+)\b/g);
+            if (node) {
+                port.insert.postMessage(node);
+            }
+
+        } else if (node.nodeType === 1) {
+            Array.prototype.slice.call(node.childNodes).forEach(recursiveTextNodes);
+        }
+    }
+
+    var mutationObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            Array.prototype.slice.call(mutation.addedNodes).forEach(recursiveTextNodes);
+        });
+    });
+
+    mutationObserver.observe(document, {childList: true, subtree: true});
+
+    document.addEventListener('input', function (event) {
         var node = event.target;
-        console.log(event);
-        if(node.selectionEnd && node.selectionStart && node.selectionEnd !== node.selectionStart) {
-            if((event.which === 9 || event.which === 13 || event.which === 39) &&
-                !event.altKey &&
-                !event.ctrlKey &&
-                !event.shiftKey) {
+
+        if (node.matches
+                && node.matches(SELECT.TEXT)) {
+            var setSelectionText,
+                predictUsingString = cursores.token(node).value.toLowerCase();
+
+            if (predictUsingString) {
+                port.query.postMessage({prefix: predictUsingString});
+
+            } else {
+                predictUsingString = node.value.slice(0, node.selectionStart)
+                    .split('').reverse().join('').match(/\W\b(\w+)\b/);
+
+                if (predictUsingString instanceof Array && predictUsingString[1]) {
+                    predictUsingString = predictUsingString[1]
+                        .split('').reverse().join('');
+
+                    port.query.postMessage({
+                        previousWord: predictUsingString
+                    });
+                }
+            }
+
+            setSelectionText = function (prediction) {
+                if (predictUsingString === prediction.query) {
+                    port.query.onMessage.removeListener(setSelectionText);
+
+                    node.setRangeText(prediction.word);
+                    node.setSelectionRange(node.selectionStart,
+                            node.selectionStart + prediction.word.length);
+                }
+            };
+
+            port.query.onMessage.addListener(setSelectionText);
+
+            setTimeout(function () {
+                port.query.onMessage.removeListener(setSelectionText);
+            }, 200);
+
+        } else if (node.matches && node.matches(SELECT.CONTENT_EDITABLE)) {
+            //TBD
+            return false;
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        var node = event.target;
+
+        if (node.selectionEnd && node.selectionStart
+                && node.selectionEnd !== node.selectionStart) {
+            if ((event.which === 9 ||
+                    event.which === 13 ||
+                    event.which === 39) &&
+
+                    !event.altKey &&
+                    !event.ctrlKey &&
+                    !event.shiftKey) {
+
                 node.setSelectionRange(node.selectionEnd, node.selectionEnd);
                 node.setRangeText(' ');
                 node.selectionStart += 1;
+
+                node.dispatchEvent(new Event('input', {
+                    bubbles: true
+                }));
+
                 event.preventDefault();
-            } else if(event.which === 8 || event.which === 46) {
+            } else if (event.which === 8 || event.which === 46) {
                 node.setRangeText('');
+
                 event.preventDefault();
             }
         }
-    }
-    function findTextNodes(node) {
-        if (!node['predictive-tab-key-auto-complete'] &&
-                node.nodeType === 3 &&
-                !node.isElementContentWhitespace &&
-                node.wholeText.trim().length > 1 &&
-                node.parentNode &&
-                node.parentNode.matches &&
-                !node.parentNode.matches('code, noscript, script, style')) {
-            node['predictive-tab-key-auto-complete'] = true;
-            port.insert.postMessage(node.wholeText.match(/\b([a-z0-9\.\-]{2,})\b/gim) || []);
-        } else if (node.nodeType === 1) {
-            Array.prototype.slice.call(node.childNodes).forEach(findTextNodes);
-            if (node.matches && node.matches('input[type="text"], textarea')) {
-                node.removeEventListener('keydown', keyboardAction);
-                node.addEventListener('keydown', keyboardAction);
-                node['predictive-tab-key-auto-complete'] = true;
-            }
-        } 
-    }
-    var mutationObserver = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            Array.prototype.slice.call(mutation.addedNodes).forEach(findTextNodes);
-        });
-    });
-    mutationObserver.observe(document, {childList: true, subtree: true});
-    document.addEventListener('DOMContentLoaded', function () {
-        document.body.addEventListener('input', function (event) {
-            var node = event.target;
-            if (node.matches && node.matches('input[type="text"], textarea')) {
-                var prefix = cursores.token(node).value.toLowerCase();
-                if (prefix) {
-                    port.query.postMessage(prefix);
-                    var process = function (prediction) {
-                        if (prediction.query === prefix) {
-                            node.setRangeText(prediction.word);
-                            node.setSelectionRange(node.selectionStart,
-                                node.selectionStart + prediction.word.length);
-                        }
-                        port.query.onMessage.removeListener(process);
-                    };
-                    port.query.onMessage.addListener(process);
-                    setTimeout(function () {
-                        port.query.onMessage.removeListener(process);
-                    }, 200);
-                }
-            } else if (node.matches && node.matches('[contenteditable]')) {
-                //TBD
-            }
-        });
-        document.body.addEventListener('keydown', function (event) {
-            var node = event.target;
-            if (node.matches && node.matches('input[type="text"], textarea')) {
-                keyboardAction(event);
-            }
-        });
     });
 }());

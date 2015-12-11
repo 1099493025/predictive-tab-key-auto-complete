@@ -14,11 +14,13 @@
 
     function preservedInputAdd(word) {
         if (!preservedInput[word.toLowerCase()]) {
+
             preservedInput[word.toLowerCase()] = {
                 frequency: 1,
                 word: word,
                 next: {}
             };
+
         } else {
             preservedInput[word.toLowerCase()].frequency += 1;
         }
@@ -39,6 +41,7 @@
         withPrefixWords.joined = withPrefixWords.join(' ');
 
         withPrefixWords = withPrefixWords
+
             .filter(function (word) {
                 return word !== prefix &&
                         !withPrefixWords.joined.match(new RegExp('\\b' + word + '[^ ]\\b'));

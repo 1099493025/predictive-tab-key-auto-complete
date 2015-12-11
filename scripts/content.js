@@ -24,6 +24,7 @@
                 !node.parentNode.matches(SELECT.IGNORE)) {
 
             node = node.wholeText.match(/\b(\w+)\b/g);
+
             if (node) {
                 port.insert.postMessage(node);
             }
@@ -46,6 +47,7 @@
 
         if (node.matches
                 && node.matches(SELECT.TEXT)) {
+
             var setSelectionText,
                 predictUsingString = cursores.token(node).value.toLowerCase();
 
@@ -53,10 +55,12 @@
                 port.query.postMessage({prefix: predictUsingString});
 
             } else {
+
                 predictUsingString = node.value.slice(0, node.selectionStart)
                     .split('').reverse().join('').match(/\W\b(\w+)\b/);
 
                 if (predictUsingString instanceof Array && predictUsingString[1]) {
+
                     predictUsingString = predictUsingString[1]
                         .split('').reverse().join('');
 
@@ -67,6 +71,7 @@
             }
 
             setSelectionText = function (prediction) {
+
                 if (predictUsingString === prediction.query) {
                     port.query.onMessage.removeListener(setSelectionText);
 
@@ -91,8 +96,12 @@
     document.addEventListener('keydown', function (event) {
         var node = event.target;
 
-        if (node.selectionEnd && node.selectionStart
+        if (node.matches &&
+                node.matches(SELECT.TEXT) &&
+                node.selectionEnd &&
+                node.selectionStart
                 && node.selectionEnd !== node.selectionStart) {
+
             if ((event.which === 9 ||
                     event.which === 13 ||
                     event.which === 39) &&

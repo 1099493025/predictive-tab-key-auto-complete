@@ -23,6 +23,7 @@
 
         } else {
             preservedInput[word.toLowerCase()].frequency += 1;
+            preservedInput[word.toLowerCase()].word = word;
         }
     }
 

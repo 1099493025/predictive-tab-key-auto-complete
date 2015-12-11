@@ -31,11 +31,13 @@
         var withPrefixWords = dictionary.dynamic.keysWithPrefix(prefix)
             .slice(0, DYNAMIC_DICTIONARY_LIMIT / 100);
 
-        if (!withPrefixWords || !withPrefixWords.length) {
+        if (!withPrefixWords ||
+                !withPrefixWords.length) {
             withPrefixWords = dictionary.static.keysWithPrefix(prefix);
         }
 
-        if (!withPrefixWords || !withPrefixWords.length) {
+        if (!withPrefixWords ||
+                !withPrefixWords.length) {
             return;
         }
 
@@ -81,20 +83,26 @@
     }
 
     function nextWordPredictor(previousWord) {
-        var nextWord = {maxFrequency: 0, word: null};
+        var words,
+            word,
+            nextWord = {maxFrequency: 0, word: null};
 
         if (!preservedInput[previousWord]) {
             return;
         }
 
-        Object.keys(preservedInput[previousWord].next).forEach(function (word) {
+        words = Object.keys(preservedInput[previousWord].next);
+
+        while (words.length) {
+            word = words.shift();
+
             if (preservedInput[previousWord].next[word] &&
                     preservedInput[previousWord].next[word] > nextWord.maxFrequency) {
 
                 nextWord.maxFrequency = preservedInput[previousWord].next[word];
                 nextWord.word = word;
             }
-        });
+        }
 
         if (nextWord.word) {
             return nextWord.word;

@@ -45,8 +45,8 @@
     document.addEventListener('input', function (event) {
         var node = event.target;
 
-        if (node.matches
-                && node.matches(SELECT.TEXT)) {
+        if (node.matches &&
+                node.matches(SELECT.TEXT)) {
 
             var setSelectionText,
                 predictUsingString = cursores.token(node).value.toLowerCase();
@@ -59,7 +59,8 @@
                 predictUsingString = node.value.slice(0, node.selectionStart)
                     .split('').reverse().join('').match(/\W\b(\w+)\b/);
 
-                if (predictUsingString instanceof Array && predictUsingString[1]) {
+                if (predictUsingString instanceof Array &&
+                        predictUsingString[1]) {
 
                     predictUsingString = predictUsingString[1]
                         .split('').reverse().join('');
@@ -87,7 +88,8 @@
                 port.query.onMessage.removeListener(setSelectionText);
             }, 200);
 
-        } else if (node.matches && node.matches(SELECT.CONTENT_EDITABLE)) {
+        } else if (node.matches &&
+                node.matches(SELECT.CONTENT_EDITABLE)) {
             //TBD
             return false;
         }
@@ -99,31 +101,49 @@
         if (node.matches &&
                 node.matches(SELECT.TEXT) &&
                 node.selectionEnd &&
-                node.selectionStart
-                && node.selectionEnd !== node.selectionStart) {
+                node.selectionStart &&
+                node.selectionEnd !== node.selectionStart &&
 
-            if ((event.which === 9 ||
+                !event.altKey &&
+                !event.ctrlKey) {
+
+            if (event.which === 9 ||
                     event.which === 13 ||
-                    event.which === 39) &&
-
-                    !event.altKey &&
-                    !event.ctrlKey &&
-                    !event.shiftKey) {
+                    event.which === 39) {
 
                 node.setSelectionRange(node.selectionEnd, node.selectionEnd);
-                node.setRangeText(' ');
-                node.selectionStart += 1;
+
+                if (!event.shiftKey) {
+                    node.setRangeText(' ');
+                    node.selectionStart += 1;
+                }
 
                 node.dispatchEvent(new Event('input', {
                     bubbles: true
                 }));
 
                 event.preventDefault();
-            } else if (event.which === 8 || event.which === 46) {
+            } else if (event.which === 8 ||
+                    event.which === 46) {
+
                 node.setRangeText('');
 
                 event.preventDefault();
             }
+        } else if (node.matches &&
+                node.matches(SELECT.TEXT) &&
+                node.selectionStart &&
+                node.selectionEnd &&
+                node.selectionEnd === node.selectionStart &&
+                event.which === 8 &&
+                event.shiftKey) {
+
+            if (node.selectionStart) {
+                node.selectionStart -= 1;
+                node.setRangeText('');
+            }
+
+            event.preventDefault();
         }
     });
 }());

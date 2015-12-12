@@ -7,6 +7,12 @@ Download Here : [Chrome Web Store - Predictive Tab Key Auto Complete](https://ch
 
 Intelligently predicts complete words as you type into any textbox on a webpage. Dynamically learns from web pages you have kept open and coupled with an offline dictionary of popular words. The suggestions given are accurate, personalized and blazingly fast!
 
+Build Instructions
+* ```npm install```
+* ```npm run build```
+* Load the unpacked extension from ```/unpacked-extension``` directory.
+* Run ```npm start``` to watch automatically rebuild on on file changes.
+
 Copyright, Bhaskar Tiwari - 2015. (MIT License)
 
 Get Me On : [bt@qbuzzer.com](mailto:bt@qbuzzer.com)
